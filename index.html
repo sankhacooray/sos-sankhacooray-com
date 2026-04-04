@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOS — Medical Emergency Info</title>
+<style>
+  :root {
+    --red: #D32F2F;
+    --red-light: #FFEBEE;
+    --dark: #1a1a1a;
+    --mid: #555;
+    --light: #f5f5f5;
+    --white: #fff;
+    --border: #ddd;
+    --green: #2E7D32;
+    --amber: #F57F17;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--white);
+    color: var(--dark);
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    background: var(--red);
+    color: var(--white);
+    padding: 14px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .top-bar h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .top-bar .updated {
+    font-size: 11px;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  /* ── COUNTRY TOGGLE ── */
+  .country-bar {
+    background: #263238;
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  .country-bar .label-text {
+    opacity: 0.7;
+    margin-right: 4px;
+  }
+  .country-btn {
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: transparent;
+    color: var(--white);
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .country-btn.active {
+    background: var(--white);
+    color: #263238;
+    border-color: var(--white);
+  }
+  .country-btn:not(.active):hover {
+    border-color: rgba(255,255,255,0.7);
+  }
+  .detected-note {
+    font-size: 10px;
+    opacity: 0.5;
+    margin-left: 8px;
+  }
+
+  /* ── EMERGENCY NUMBER BANNER ── */
+  .emergency-number {
+    background: var(--red);
+    text-align: center;
+    padding: 10px;
+  }
+  .emergency-number a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+  .emergency-number .em-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 400;
+    display: block;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  /* ── IDENTITY CARD ── */
+  .identity {
+    background: var(--red-light);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .identity .name {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--red);
+  }
+  .identity .dob {
+    font-size: 15px;
+    color: var(--mid);
+    margin-top: 2px;
+  }
+  .identity .blood {
+    display: inline-block;
+    background: var(--red);
+    color: var(--white);
+    font-size: 28px;
+    font-weight: 900;
+    padding: 6px 20px;
+    border-radius: 8px;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--light);
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--mid);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-body {
+    padding: 14px 16px;
+  }
+
+  /* ── KEY-VALUE ROWS ── */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .label {
+    font-size: 13px;
+    color: var(--mid);
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  .row .value {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* ── ALERT TAGS ── */
+  .alert-tag {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    margin: 3px 4px 3px 0;
+  }
+  .alert-tag.safe {
+    background: #E8F5E9;
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  /* ── CONTACT CARD ── */
+  .contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .contact:last-child { border-bottom: none; }
+  .contact-info .contact-name {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .contact-info .contact-relation {
+    font-size: 12px;
+    color: var(--mid);
+  }
+  .contact a {
+    display: inline-block;
+    background: var(--green);
+    color: var(--white);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── MEDICATIONS TABLE ── */
+  .med-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+  .med-item:last-child { border-bottom: none; }
+  .med-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .med-detail {
+    font-size: 13px;
+    color: var(--mid);
+  }
+
+  /* ── NOTES ── */
+  .notes {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── COUNTRY-SPECIFIC VISIBILITY ──
+     All elements with data-country are hidden by default.
+     JS adds a class to <body> to reveal the right ones. */
+  [data-country] { display: none !important; }
+  body.country-sg [data-country~="sg"] { display: block !important; }
+  body.country-lk [data-country~="lk"] { display: block !important; }
+  body.country-sg [data-country~="all"],
+  body.country-lk [data-country~="all"],
+  body.country-other [data-country~="all"] { display: block !important; }
+  /* contacts use flex */
+  body.country-sg .contact[data-country~="sg"],
+  body.country-lk .contact[data-country~="lk"],
+  body.country-sg .contact[data-country~="all"],
+  body.country-lk .contact[data-country~="all"],
+  body.country-other .contact[data-country~="all"],
+  body.country-other .contact[data-country~="sg"],
+  body.country-other .contact[data-country~="lk"] { display: flex !important; }
+  /* emergency number banners */
+  body.country-sg .emergency-number[data-country~="sg"],
+  body.country-lk .emergency-number[data-country~="lk"],
+  body.country-other .emergency-number[data-country~="sg"],
+  body.country-other .emergency-number[data-country~="lk"] { display: block !important; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: #999;
+  }
+
+  /* ── PRINT — show everything ── */
+  @media print {
+    .top-bar, .country-bar { position: static; }
+    .contact a { border: 1px solid #000; color: #000; background: none; }
+    body { font-size: 12pt; }
+    [data-country] { display: block !important; }
+    .contact[data-country] { display: flex !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>⚕ Medical Emergency Info</h1>
+  <div class="updated">Last updated: April 2026</div>
+</div>
+
+<!-- COUNTRY TOGGLE -->
+<div class="country-bar">
+  <span class="label-text">Location:</span>
+  <button class="country-btn" id="btn-sg" onclick="setCountry('sg')">🇸🇬 Singapore</button>
+  <button class="country-btn" id="btn-lk" onclick="setCountry('lk')">🇱🇰 Sri Lanka</button>
+  <span class="detected-note" id="auto-note"></span>
+</div>
+
+<!-- EMERGENCY NUMBERS — country specific -->
+<div class="emergency-number" data-country="sg">
+  <a href="tel:995">
+    <span class="em-label">SG Emergency Ambulance</span>
+    995
+  </a>
+</div>
+<div class="emergency-number" data-country="lk">
+  <a href="tel:1990">
+    <span class="em-label">LK Emergency Ambulance (Suwa Seriya)</span>
+    1990
+  </a>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  UNIVERSAL INFO (always visible)      -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- IDENTITY -->
+  <div class="identity">
+    <div class="name">Sankha Cooray</div>
+    <div class="dob">DOB: 11 Apr 1991 &nbsp;·&nbsp; Age <span id="age"></span> &nbsp;·&nbsp; Male</div>
+    <div class="blood">O+</div>
+  </div>
+
+  <!-- ALLERGIES -->
+  <div class="section">
+    <div class="section-header">⚠ Allergies</div>
+    <div class="section-body">
+      <span class="alert-tag safe">No known allergies (NKDA)</span>
+    </div>
+  </div>
+
+  <!-- CONDITIONS -->
+  <div class="section">
+    <div class="section-header">Conditions</div>
+    <div class="section-body">
+      <div class="row">
+        <span class="label">Chronic</span>
+        <span class="value">None</span>
+      </div>
+      <div class="row">
+        <span class="label">Previous surgery</span>
+        <span class="value">None</span>
+      </div>
+      <div class="row">
+        <span class="label">Vision</span>
+        <span class="value">Normal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENT MEDICATIONS -->
+  <div class="section">
+    <div class="section-header">Current Medications</div>
+    <div class="section-body">
+      <div class="med-item">
+        <div class="med-name">None currently</div>
+      </div>
+      <div class="med-item" style="background:#FFF8E1; padding:10px; border-radius:6px; margin-top:6px;">
+        <div class="med-name" style="color:#F57F17;">⚠ Lipid Note — Lean Mass Hyper-Responder</div>
+        <div class="med-detail">LDL levels rise naturally unless exercising regularly. Cholesterol is exercise-dominant — not pathological. Please factor this into any lipid panel interpretation.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VITAL BASELINES -->
+  <div class="section">
+    <div class="section-header">Vital Baselines (normal for me)</div>
+    <div class="section-body">
+      <div class="row">
+        <span class="label">Resting HR</span>
+        <span class="value">70 bpm</span>
+      </div>
+      <div class="row">
+        <span class="label">Blood pressure</span>
+        <span class="value">110/80</span>
+      </div>
+      <div class="row">
+        <span class="label">Weight</span>
+        <span class="value">55 kg</span>
+      </div>
+      <div class="row">
+        <span class="label">Height</span>
+        <span class="value">175 cm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!--  COUNTRY-SPECIFIC SECTIONS            -->
+  <!-- ══════════════════════════════════════ -->
+
+  <!-- INSURANCE — SINGAPORE -->
+  <div class="section" data-country="sg">
+    <div class="section-header">🇸🇬 Insurance & ID (Singapore)</div>
+    <div class="section-body">
+      <div class="row">
+        <span class="label">Insurance</span>
+        <span class="value">SG Provider — Policy #XXXXX</span>
+      </div>
+      <div class="row">
+        <span class="label">FIN / NRIC</span>
+        <span class="value">S····XXXA</span>
+      </div>
+      <div class="row">
+        <span class="label">Passport</span>
+        <span class="value">N····XXXX (Sri Lanka)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSURANCE — SRI LANKA -->
+  <div class="section" data-country="lk">
+    <div class="section-header">🇱🇰 Insurance & ID (Sri Lanka)</div>
+    <div class="section-body">
+      <div class="row">
+        <span class="label">Insurance</span>
+        <span class="value">LK Provider — Policy #XXXXX</span>
+      </div>
+      <div class="row">
+        <span class="label">NIC</span>
+        <span class="value">········XXXX</span>
+      </div>
+      <div class="row">
+        <span class="label">Passport</span>
+        <span class="value">N····XXXX (Sri Lanka)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMERGENCY CONTACTS -->
+  <div class="section">
+    <div class="section-header">Emergency Contacts</div>
+    <div class="section-body">
+
+      <!-- Always visible -->
+      <div class="contact" data-country="all">
+        <div class="contact-info">
+          <div class="contact-name">Primary Contact Name</div>
+          <div class="contact-relation">Relationship · Always reachable</div>
+        </div>
+        <a href="tel:+00000000000">Call</a>
+      </div>
+
+      <!-- SG only -->
+      <div class="contact" data-country="sg">
+        <div class="contact-info">
+          <div class="contact-name">Suranga</div>
+          <div class="contact-relation">Friend · Singapore</div>
+        </div>
+        <a href="tel:+6590000000">Call</a>
+      </div>
+
+      <div class="contact" data-country="sg">
+        <div class="contact-info">
+          <div class="contact-name">SG Doctor Name</div>
+          <div class="contact-relation">GP · SG Clinic Name</div>
+        </div>
+        <a href="tel:+6560000000">Call</a>
+      </div>
+
+      <!-- LK only -->
+      <div class="contact" data-country="lk">
+        <div class="contact-info">
+          <div class="contact-name">Manel</div>
+          <div class="contact-relation">Mother · Sri Lanka</div>
+        </div>
+        <a href="tel:+94770000000">Call</a>
+      </div>
+
+      <div class="contact" data-country="lk">
+        <div class="contact-info">
+          <div class="contact-name">LK Doctor Name</div>
+          <div class="contact-relation">GP · LK Clinic/Hospital</div>
+        </div>
+        <a href="tel:+94770000001">Call</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ADDITIONAL NOTES -->
+  <div class="section">
+    <div class="section-header">Additional Notes</div>
+    <div class="section-body notes">
+      Organ donor: No<br>
+      Languages: English, Sinhala<br>
+      Religious/cultural considerations: None
+    </div>
+  </div>
+
+  <!-- PREFERRED HOSPITALS — country specific -->
+  <div class="section" data-country="sg">
+    <div class="section-header">🇸🇬 Preferred Hospital</div>
+    <div class="section-body notes">
+      National University Hospital (NUH)<br>
+      5 Lower Kent Ridge Rd, Singapore 119074<br>
+      <a href="tel:+6569082222" style="color:var(--green); font-weight:600;">+65 6908 2222</a>
+    </div>
+  </div>
+
+  <div class="section" data-country="lk">
+    <div class="section-header">🇱🇰 Preferred Hospital</div>
+    <div class="section-body notes">
+      National Hospital of Sri Lanka<br>
+      Regent Street, Colombo 00700, Sri Lanka<br>
+      <a href="tel:+94112691111" style="color:var(--green); font-weight:600;">+94 112 691 111</a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  This page is for emergency medical responders.<br>
+  If you found this person unconscious or in distress, please call emergency services first.
+</footer>
+
+<script>
+  // ── CALCULATE AGE ──
+  (function() {
+    var dob = new Date(1991, 3, 11); // Apr 11, 1991 (month is 0-indexed)
+    var today = new Date();
+    var age = today.getFullYear() - dob.getFullYear();
+    var m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+    document.getElementById('age').textContent = age;
+  })();
+
+  // ── TIMEZONE-BASED COUNTRY DETECTION ──
+  // No API calls, no permissions, works offline, instant.
+  function detectCountry() {
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz === 'Asia/Singapore') return 'sg';
+      if (tz === 'Asia/Colombo') return 'lk';
+    } catch(e) {}
+    return 'other';
+  }
+
+  function setCountry(code) {
+    document.body.className = 'country-' + code;
+    document.getElementById('btn-sg').className = 'country-btn' + (code === 'sg' ? ' active' : '');
+    document.getElementById('btn-lk').className = 'country-btn' + (code === 'lk' ? ' active' : '');
+  }
+
+  // Auto-detect on load
+  (function() {
+    var detected = detectCountry();
+    setCountry(detected === 'other' ? 'sg' : detected);
+    if (detected !== 'other') {
+      document.getElementById('auto-note').textContent = '(auto-detected)';
+    } else {
+      document.getElementById('auto-note').textContent = '(location unknown — showing both)';
+      setCountry('other');
+    }
+  })();
+</script>
+
+</body>
+</html>
